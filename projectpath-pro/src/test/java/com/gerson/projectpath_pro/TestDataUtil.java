@@ -4,10 +4,10 @@ import java.time.LocalDate;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.gerson.projectpath_pro.auth.controller.RegisterRequest;
 import com.gerson.projectpath_pro.project.repository.Project;
 import com.gerson.projectpath_pro.project.repository.dto.ProjectDto;
 import com.gerson.projectpath_pro.user.User;
-
 
 public class TestDataUtil {
 
@@ -45,12 +45,24 @@ public class TestDataUtil {
                 .build();
     }
 
+    public static ProjectDto createTestProjectDtoB() {
+        return ProjectDto.builder()
+                .id(2L)
+                .name("FitnessTracker")
+                .description("A project made to keep track of your gym weights and PRs")
+                .build();
+    }
+
     public static Project createTestProjectC() {
         return Project.builder()
                 .id(3L)
                 .name("Healthcare AI")
                 .description("A project made to predict a possible disease based on a list of 132 symptoms")
                 .build();
+    }
+
+    public static RegisterRequest createTestRegisterRequestA() {
+        return new RegisterRequest("Pepe Le Pu", "onlypepe", "pepe@gmail.com", LocalDate.of(1996, 4, 19), "peiapso");
     }
 
 }
