@@ -1,5 +1,7 @@
 package com.gerson.projectpath_pro.project.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,13 +26,12 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ProjectDto createProject(@RequestBody ProjectDto projectDto) {
+    public ResponseEntity<ProjectDto> createProject(@RequestBody ProjectDto projectDto) {
         Project project = projectMapper.mapFrom(projectDto);
 
         Project savedProject = projectService.createProject(project);
 
-        return projectMapper.mapTo(savedProject);
+        return new ResponseEntity<>(projectMapper.mapTo(savedProject), HttpStatus.CREATED);
     }
-
 
 }
