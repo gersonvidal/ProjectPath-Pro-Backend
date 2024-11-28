@@ -13,6 +13,8 @@ public interface ActivityService {
 
     Optional<Activity> findById(Long id);
 
+    List<Activity> getActivitiesByProjectId(Long projectId);
+
     boolean isExists(Long id);
 
     Activity partialUpdate(Long id, Activity activity);

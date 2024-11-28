@@ -49,6 +49,15 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
+    public List<Activity> getActivitiesByProjectId(Long projectId) {
+        if (!projectService.isExists(projectId)) {
+            throw new IllegalArgumentException("Project with id " + projectId + " does not exist");
+        }
+
+        return activityRepository.findByProjectId(projectId);
+    }
+
+    @Override
     public boolean isExists(Long id) {
         return activityRepository.existsById(id);
     }

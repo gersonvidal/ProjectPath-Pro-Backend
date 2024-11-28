@@ -52,8 +52,8 @@ public class ActivityController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if (activityPostRequestDto.getPredecessors() == null
-                || !activityPostRequestDto.getPredecessors().matches(REGEX_PATTERN)) {
+        if (activityPostRequestDto.getPredecessors() != null
+                && !activityPostRequestDto.getPredecessors().matches(REGEX_PATTERN)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -61,7 +61,8 @@ public class ActivityController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if (activityPostRequestDto.getProjectDto().getId() == null || activityPostRequestDto.getProjectDto().getId() < 1) {
+        if (activityPostRequestDto.getProjectDto().getId() == null
+                || activityPostRequestDto.getProjectDto().getId() < 1) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -72,7 +73,7 @@ public class ActivityController {
         Activity savedActivity = activityService.save(activity);
 
         return new ResponseEntity<>(activityMapper.mapTo(savedActivity),
-        HttpStatus.CREATED);
+                HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -92,6 +93,23 @@ public class ActivityController {
             ActivityDto activityDto = activityMapper.mapTo(activity);
             return new ResponseEntity<>(activityDto, HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping("/project/{id}")
+    public ResponseEntity<List<ActivityDto>> getActivitiesByProjectId(@PathVariable("id") Long projectId) {
+
+        if (projectId == null || projectId < 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        List<Activity> activities = activityService.getActivitiesByProjectId(projectId);
+
+        List<ActivityDto> activityDtos = activities.stream()
+                .map(activityMapper::mapTo)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(activityDtos, HttpStatus.OK);
+
     }
 
     @PutMapping(path = "/{id}")
