@@ -19,7 +19,7 @@ public class ActivityPostRequestDto {
 
     private String predecessors;
 
-    private int daysDuration;
+    private Integer daysDuration;
 
     private ProjectDto projectDto;
 

@@ -42,7 +42,7 @@ public class Activity {
     private String predecessors;
 
     @Column(nullable = false)
-    private int daysDuration;
+    private Integer daysDuration;
 
     @Column(nullable = true)
     @Comment("note: The value corresponds to days")

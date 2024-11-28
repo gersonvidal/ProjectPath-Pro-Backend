@@ -68,6 +68,8 @@ public class ActivityServiceImpl implements ActivityService {
 
         return activityRepository.findById(id).map(existingActivity -> {
             Optional.ofNullable(activity.getName()).ifPresent(existingActivity::setName);
+            Optional.ofNullable(activity.getLabel()).ifPresent(existingActivity::setLabel);
+            existingActivity.setPredecessors(activity.getPredecessors()); // Updates it with null or valid predecessors
             Optional.ofNullable(activity.getDaysDuration()).ifPresent(existingActivity::setDaysDuration);
 
             return activityRepository.save(existingActivity);
@@ -75,8 +77,6 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     // TODO: Make a method for editing predecessors (private String predecessors)
-
-    // TODO: Can change an activity's project?? (private Project project)
 
     @Override
     public void delete(Long id) {

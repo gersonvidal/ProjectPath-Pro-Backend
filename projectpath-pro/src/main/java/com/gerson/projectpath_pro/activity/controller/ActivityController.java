@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gerson.projectpath_pro.activity.repository.Activity;
 import com.gerson.projectpath_pro.activity.repository.dto.ActivityDto;
 import com.gerson.projectpath_pro.activity.repository.dto.ActivityPostRequestDto;
+import com.gerson.projectpath_pro.activity.repository.dto.ActivityPatchRequestDto;
 import com.gerson.projectpath_pro.activity.service.ActivityService;
 import com.gerson.projectpath_pro.mappers.Mapper;
 
@@ -32,15 +33,20 @@ public class ActivityController {
 
     private Mapper<Activity, ActivityPostRequestDto> activityPostRequestMapper;
 
+    private Mapper<Activity, ActivityPatchRequestDto> activityPatchRequestMapper;
+
     private final String REGEX_PATTERN = "^([A-Z])(,([A-Z]))*$";
 
     public ActivityController(ActivityService activityService, Mapper<Activity, ActivityDto> activityMapper,
-            Mapper<Activity, ActivityPostRequestDto> activityRequestMapper) {
+            Mapper<Activity, ActivityPostRequestDto> activityPostRequestMapper,
+            Mapper<Activity, ActivityPatchRequestDto> activityPatchRequestMapper) {
         this.activityService = activityService;
         this.activityMapper = activityMapper;
-        this.activityPostRequestMapper = activityRequestMapper;
+        this.activityPostRequestMapper = activityPostRequestMapper;
+        this.activityPatchRequestMapper = activityPatchRequestMapper;
     }
 
+    // TODO: Validate label is in uppercase
     @PostMapping
     public ResponseEntity<ActivityDto> createActivity(@RequestBody ActivityPostRequestDto activityPostRequestDto) {
 
@@ -57,7 +63,7 @@ public class ActivityController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if (activityPostRequestDto.getDaysDuration() < 1) {
+        if (activityPostRequestDto.getDaysDuration() == null || activityPostRequestDto.getDaysDuration() < 1) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -67,8 +73,6 @@ public class ActivityController {
         }
 
         Activity activity = activityPostRequestMapper.mapFrom(activityPostRequestDto);
-
-        System.out.println(activity);
 
         Activity savedActivity = activityService.save(activity);
 
@@ -112,36 +116,55 @@ public class ActivityController {
 
     }
 
-    @PutMapping(path = "/{id}")
-    public ResponseEntity<ActivityDto> fullUpdateActivity(
-            @PathVariable("id") Long id,
-            @RequestBody ActivityDto activityDto) {
+    // @PutMapping(path = "/{id}")
+    // public ResponseEntity<ActivityDto> fullUpdateActivity(
+    // @PathVariable("id") Long id,
+    // @RequestBody ActivityDto activityDto) {
 
-        if (!activityService.isExists(id)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    // if (!activityService.isExists(id)) {
+    // return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    // }
 
-        activityDto.setId(id);
-        Activity activity = activityMapper.mapFrom(activityDto);
+    // activityDto.setId(id);
+    // Activity activity = activityMapper.mapFrom(activityDto);
 
-        Activity savedActivity = activityService.save(activity);
+    // Activity savedActivity = activityService.save(activity);
 
-        return new ResponseEntity<>(
-                activityMapper.mapTo(savedActivity),
-                HttpStatus.OK);
-    }
+    // return new ResponseEntity<>(
+    // activityMapper.mapTo(savedActivity),
+    // HttpStatus.OK);
+    // }
 
-    // TODO: Update only name, predecessors, daysDuration and projectId
+    // TODO: Update only predecessors
     @PatchMapping(path = "/{id}")
     public ResponseEntity<ActivityDto> partialUpdate(
             @PathVariable("id") Long id,
-            @RequestBody ActivityDto activityDto) {
+            @RequestBody ActivityPatchRequestDto activityPatchRequestDto) {
 
         if (!activityService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        Activity activity = activityMapper.mapFrom(activityDto);
+        if (activityPatchRequestDto.getName() != null && activityPatchRequestDto.getName().isBlank()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (activityPatchRequestDto.getLabel() != null && activityPatchRequestDto.getLabel().isBlank()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (activityPatchRequestDto.getPredecessors() != null
+                && !activityPatchRequestDto.getPredecessors().matches(REGEX_PATTERN)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (activityPatchRequestDto.getDaysDuration() != null && activityPatchRequestDto.getDaysDuration() < 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        Activity activity = activityPatchRequestMapper.mapFrom(activityPatchRequestDto);
+        System.out.println(activity);
+
         Activity updatedActivity = activityService.partialUpdate(id, activity);
 
         return new ResponseEntity<>(
