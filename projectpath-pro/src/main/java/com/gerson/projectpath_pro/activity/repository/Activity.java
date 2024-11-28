@@ -42,29 +42,29 @@ public class Activity {
     private String predecessors;
 
     @Column(nullable = false)
-    private int days_duration;
+    private int daysDuration;
 
     @Column(nullable = true)
     @Comment("note: The value corresponds to days")
-    private Integer close_start;
+    private Integer closeStart;
 
     @Column(nullable = true)
     @Comment("note: The value corresponds to days")
-    private Integer distant_start;
+    private Integer distantStart;
 
     @Column(nullable = true)
     @Comment("note: The value corresponds to days")
-    private Integer close_finish;
+    private Integer closeFinish;
 
     @Column(nullable = true)
     @Comment("note: The value corresponds to days")
-    private Integer distant_finish;
+    private Integer distantFinish;
 
     @Column(nullable = true)
     @Comment("note: The value corresponds to days")
     private Integer slack;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 

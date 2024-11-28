@@ -2,7 +2,6 @@ package com.gerson.projectpath_pro;
 
 import java.time.LocalDate;
 
-import org.hibernate.annotations.Comment;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.gerson.projectpath_pro.activity.repository.Activity;
@@ -10,11 +9,6 @@ import com.gerson.projectpath_pro.auth.controller.RegisterRequest;
 import com.gerson.projectpath_pro.project.repository.Project;
 import com.gerson.projectpath_pro.project.repository.dto.ProjectDto;
 import com.gerson.projectpath_pro.user.User;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 
 public class TestDataUtil {
 
@@ -74,11 +68,11 @@ public class TestDataUtil {
                 .name("Security Investigation")
                 .label("A")
                 .predecessors(null)
-                .days_duration(3)
-                .close_start(null)
-                .distant_start(null)
-                .close_finish(null)
-                .distant_finish(null)
+                .daysDuration(3)
+                .closeStart(null)
+                .distantStart(null)
+                .closeFinish(null)
+                .distantFinish(null)
                 .slack(null)
                 .project(project)
                 .build();
@@ -90,11 +84,11 @@ public class TestDataUtil {
                 .name("Login/Sign In Screen")
                 .label("B")
                 .predecessors(null)
-                .days_duration(2)
-                .close_start(null)
-                .distant_start(null)
-                .close_finish(null)
-                .distant_finish(null)
+                .daysDuration(2)
+                .closeStart(null)
+                .distantStart(null)
+                .closeFinish(null)
+                .distantFinish(null)
                 .slack(null)
                 .project(project)
                 .build();
@@ -106,11 +100,11 @@ public class TestDataUtil {
                 .name("Landing Page")
                 .label("C")
                 .predecessors("A,B")
-                .days_duration(5)
-                .close_start(null)
-                .distant_start(null)
-                .close_finish(null)
-                .distant_finish(null)
+                .daysDuration(5)
+                .closeStart(null)
+                .distantStart(null)
+                .closeFinish(null)
+                .distantFinish(null)
                 .slack(null)
                 .project(project)
                 .build();
