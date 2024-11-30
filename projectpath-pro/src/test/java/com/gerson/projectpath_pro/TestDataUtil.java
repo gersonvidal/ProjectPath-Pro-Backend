@@ -4,6 +4,9 @@ import java.time.LocalDate;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.gerson.projectpath_pro.activity.repository.Activity;
+import com.gerson.projectpath_pro.activity.repository.dto.ActivityPatchRequestDto;
+import com.gerson.projectpath_pro.activity.repository.dto.ActivityPostRequestDto;
 import com.gerson.projectpath_pro.auth.controller.RegisterRequest;
 import com.gerson.projectpath_pro.project.repository.Project;
 import com.gerson.projectpath_pro.project.repository.dto.ProjectDto;
@@ -61,8 +64,84 @@ public class TestDataUtil {
                 .build();
     }
 
+    public static Activity createTestActivityA(Project project) {
+        return Activity.builder()
+                .id(1L)
+                .name("Security Investigation")
+                .label("A")
+                .predecessors(null)
+                .daysDuration(3)
+                .closeStart(null)
+                .distantStart(null)
+                .closeFinish(null)
+                .distantFinish(null)
+                .slack(null)
+                .project(project)
+                .build();
+    }
+
+    public static Activity createTestActivityB(Project project) {
+        return Activity.builder()
+                .id(2L)
+                .name("Login/Sign In Screen")
+                .label("B")
+                .predecessors(null)
+                .daysDuration(2)
+                .closeStart(null)
+                .distantStart(null)
+                .closeFinish(null)
+                .distantFinish(null)
+                .slack(null)
+                .project(project)
+                .build();
+    }
+
+    public static Activity createTestActivityC(Project project) {
+        return Activity.builder()
+                .id(3L)
+                .name("Landing Page")
+                .label("C")
+                .predecessors("A,B")
+                .daysDuration(5)
+                .closeStart(null)
+                .distantStart(null)
+                .closeFinish(null)
+                .distantFinish(null)
+                .slack(null)
+                .project(project)
+                .build();
+    }
+
     public static RegisterRequest createTestRegisterRequestA() {
         return new RegisterRequest("Pepe Le Pu", "onlypepe", "pepe@gmail.com", LocalDate.of(1996, 4, 19), "peiapso");
+    }
+
+    public static ActivityPostRequestDto createTestActivityPostRequestDtoA(ProjectDto projectDto) {
+        return ActivityPostRequestDto.builder()
+                .name("Security Investigation")
+                .label("A")
+                .predecessors(null)
+                .daysDuration(3)
+                .projectDto(projectDto)
+                .build();
+    }
+
+    public static ActivityPatchRequestDto createTestActivityPatchRequestDtoA() {
+        return ActivityPatchRequestDto.builder()
+                .name("UI")
+                .predecessors(null)
+                .daysDuration(3)
+                .build();
+    }
+
+    public static ActivityPostRequestDto createTestActivityPostRequestDtoB(ProjectDto projectDto) {
+        return ActivityPostRequestDto.builder()
+                .name("Login/Sign In Screen")
+                .label("B")
+                .predecessors(null)
+                .daysDuration(2)
+                .projectDto(projectDto)
+                .build();
     }
 
 }

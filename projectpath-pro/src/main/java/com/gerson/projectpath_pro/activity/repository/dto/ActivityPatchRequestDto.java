@@ -1,4 +1,4 @@
-package com.gerson.projectpath_pro.project.repository.dto;
+package com.gerson.projectpath_pro.activity.repository.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,14 +9,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProjectDto {
-
-    private Long id;
+public class ActivityPatchRequestDto {
 
     private String name;
 
-    private String description;
+    // private String label;
 
-    // TODO: DTO private Calculation calculation;
+    private String predecessors;
+
+    private Integer daysDuration;
 
 }
