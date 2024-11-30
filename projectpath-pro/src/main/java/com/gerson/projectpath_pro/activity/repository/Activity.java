@@ -4,7 +4,6 @@ import org.hibernate.annotations.Comment;
 
 import com.gerson.projectpath_pro.project.repository.Project;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

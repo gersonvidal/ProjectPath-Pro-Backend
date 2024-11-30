@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,8 @@ import com.gerson.projectpath_pro.activity.repository.dto.ActivityPostRequestDto
 import com.gerson.projectpath_pro.activity.repository.dto.ActivityPatchRequestDto;
 import com.gerson.projectpath_pro.activity.service.ActivityService;
 import com.gerson.projectpath_pro.mappers.Mapper;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping("/api/activities")
@@ -47,6 +50,10 @@ public class ActivityController {
     }
 
     // TODO: Validate label is in uppercase
+    // TODO: Validate that predecessors is not recursive (e.g Activity E doesn't
+    // contain A,B,C,D,E)
+    // TODO: Validate that Activity E is > predecessors (splitting them into a
+    // String[] and then number for comparison)
     @PostMapping
     public ResponseEntity<ActivityDto> createActivity(@RequestBody ActivityPostRequestDto activityPostRequestDto) {
 
@@ -135,7 +142,10 @@ public class ActivityController {
     // HttpStatus.OK);
     // }
 
-    // TODO: Update only predecessors
+    // TODO: Validate that predecessors is not recursive (e.g Activity E doesn't
+    // contain A,B,C,D,E)
+    // TODO: Validate that Activity E is > predecessors (splitting them into a
+    // String[] and then number for comparison)
     @PatchMapping(path = "/{id}")
     public ResponseEntity<ActivityDto> partialUpdate(
             @PathVariable("id") Long id,
@@ -149,9 +159,10 @@ public class ActivityController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if (activityPatchRequestDto.getLabel() != null && activityPatchRequestDto.getLabel().isBlank()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        // if (activityPatchRequestDto.getLabel() != null &&
+        // activityPatchRequestDto.getLabel().isBlank()) {
+        // return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        // }
 
         if (activityPatchRequestDto.getPredecessors() != null
                 && !activityPatchRequestDto.getPredecessors().matches(REGEX_PATTERN)) {
@@ -173,12 +184,16 @@ public class ActivityController {
 
     }
 
-    // TODO: Delete in database all predecessors that had the eliminated activity
     @DeleteMapping(path = "/{id}")
     public ResponseEntity deleteActivity(@PathVariable("id") Long id) {
         activityService.delete(id);
 
         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
 }

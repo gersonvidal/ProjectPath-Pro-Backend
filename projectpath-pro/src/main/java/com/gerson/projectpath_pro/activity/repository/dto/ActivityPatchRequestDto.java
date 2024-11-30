@@ -13,7 +13,7 @@ public class ActivityPatchRequestDto {
 
     private String name;
 
-    private String label;
+    // private String label;
 
     private String predecessors;
 
