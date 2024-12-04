@@ -67,6 +67,26 @@ public class CalculationRepositoryIntegrationTests {
     }
 
     @Test
+    public void testThatGetCalculationByProjectIdReturnsCalculation() {
+        projectRepository.save(TestDataUtil.createTestProjectA());
+
+        Calculation calculation = TestDataUtil.createTestCalculationA(TestDataUtil.createTestProjectA());
+        underTest.save(calculation);
+
+        Optional<Calculation> result = underTest.findByProjectId(1L);
+
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(calculation);
+    }
+
+    @Test
+    public void testThatGetCalculationByProjectIdReturnsEmptyWhenNoCalculationExists() {
+        Optional<Calculation> result = underTest.findByProjectId(1L);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
     public void testThatCalculationCanBeUpdated() {
         projectRepository.save(TestDataUtil.createTestProjectA());
 
