@@ -8,6 +8,7 @@ import com.gerson.projectpath_pro.activity.repository.Activity;
 import com.gerson.projectpath_pro.activity.repository.dto.ActivityPatchRequestDto;
 import com.gerson.projectpath_pro.activity.repository.dto.ActivityPostRequestDto;
 import com.gerson.projectpath_pro.auth.controller.RegisterRequest;
+import com.gerson.projectpath_pro.calculation.repository.Calculation;
 import com.gerson.projectpath_pro.project.repository.Project;
 import com.gerson.projectpath_pro.project.repository.dto.ProjectDto;
 import com.gerson.projectpath_pro.user.User;
@@ -141,6 +142,33 @@ public class TestDataUtil {
                 .predecessors(null)
                 .daysDuration(2)
                 .projectDto(projectDto)
+                .build();
+    }
+
+    public static Calculation createTestCalculationA(Project project) {
+        return Calculation.builder()
+                .id(1L)
+                .critical_path("L-M-N-O-P")
+                .estimated_duration(40)
+                .project(project)
+                .build();
+    }
+
+    public static Calculation createTestCalculationB(Project project) {
+        return Calculation.builder()
+                .id(2L)
+                .critical_path("B-C-D")
+                .estimated_duration(15)
+                .project(project)
+                .build();
+    }
+
+    public static Calculation createTestCalculationC(Project project) {
+        return Calculation.builder()
+                .id(3L)
+                .critical_path("B-C-D-E-F-G-H")
+                .estimated_duration(35)
+                .project(project)
                 .build();
     }
 

@@ -10,6 +10,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.gerson.projectpath_pro.TestDataUtil;
 import com.gerson.projectpath_pro.activity.repository.Activity;
 import com.gerson.projectpath_pro.activity.repository.ActivityRepository;
+import com.gerson.projectpath_pro.project.repository.ProjectRepository;
 
 import java.util.Optional;
 
@@ -22,13 +23,18 @@ public class ActivityRepositoryIntegrationTests {
 
     private ActivityRepository underTest;
 
+    private ProjectRepository projectRepository;
+
     @Autowired
-    public ActivityRepositoryIntegrationTests(ActivityRepository underTest) {
+    public ActivityRepositoryIntegrationTests(ActivityRepository underTest, ProjectRepository projectRepository) {
         this.underTest = underTest;
+        this.projectRepository = projectRepository;
     }
 
     @Test
     public void testThatActivityCanBeCreatedAndRecalled() {
+        projectRepository.save(TestDataUtil.createTestProjectA());
+
         Activity activity = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA());
         underTest.save(activity);
 
@@ -40,6 +46,10 @@ public class ActivityRepositoryIntegrationTests {
 
     @Test
     public void testThatMultipleActivitesCanBeCreatedAndRecalled() {
+        projectRepository.save(TestDataUtil.createTestProjectA());
+        projectRepository.save(TestDataUtil.createTestProjectB());
+        projectRepository.save(TestDataUtil.createTestProjectC());
+
         Activity activityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA());
         underTest.save(activityA);
 
@@ -58,6 +68,8 @@ public class ActivityRepositoryIntegrationTests {
 
     @Test
     public void testThatActivityCanBeUpdated() {
+        projectRepository.save(TestDataUtil.createTestProjectA());
+
         Activity activityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA());
         underTest.save(activityA);
 
@@ -72,6 +84,8 @@ public class ActivityRepositoryIntegrationTests {
 
     @Test
     public void testThatActivityCanBeDeleted() {
+        projectRepository.save(TestDataUtil.createTestProjectA());
+
         Activity activityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA());
         underTest.save(activityA);
 
