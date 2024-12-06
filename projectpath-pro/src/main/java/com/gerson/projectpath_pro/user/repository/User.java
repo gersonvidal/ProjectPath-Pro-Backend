@@ -1,4 +1,4 @@
-package com.gerson.projectpath_pro.user;
+package com.gerson.projectpath_pro.user.repository;
 
 import java.time.LocalDate;
 import java.util.List;

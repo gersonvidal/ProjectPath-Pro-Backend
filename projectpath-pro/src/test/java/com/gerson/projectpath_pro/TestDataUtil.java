@@ -11,7 +11,7 @@ import com.gerson.projectpath_pro.auth.controller.RegisterRequest;
 import com.gerson.projectpath_pro.calculation.repository.Calculation;
 import com.gerson.projectpath_pro.project.repository.Project;
 import com.gerson.projectpath_pro.project.repository.dto.ProjectDto;
-import com.gerson.projectpath_pro.user.User;
+import com.gerson.projectpath_pro.user.repository.User;
 
 public class TestDataUtil {
 
