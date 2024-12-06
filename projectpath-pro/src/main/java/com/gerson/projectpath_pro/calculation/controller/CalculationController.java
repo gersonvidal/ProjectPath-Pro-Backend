@@ -2,14 +2,16 @@ package com.gerson.projectpath_pro.calculation.controller;
 
 import java.util.Optional;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.gerson.projectpath_pro.calculation.repository.Calculation;
 import com.gerson.projectpath_pro.calculation.repository.dto.CalculationDto;
@@ -32,9 +34,25 @@ public class CalculationController {
         this.calculationMapper = calculationMapper;
     }
 
-    // TODO: Post
+    @PostMapping("/project/{id}")
+    public ResponseEntity<byte[]> createNetworkAndCriticalPathDiagram(@PathVariable("id") Long projectId) {
+        byte[] pngBytes = calculationService.getNetworkAndCriticalPathDiagram(projectId);
 
-    @GetMapping("{id}")
+        if (pngBytes.length == 0) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_PNG);
+
+        return new ResponseEntity<>(
+                pngBytes,
+                headers,
+                HttpStatus.OK);
+
+    }
+
+    @GetMapping("/project/{id}")
     public ResponseEntity<CalculationDto> getCalculationByProjectId(@PathVariable("id") Long projectId) {
         if (projectId == null || projectId < 1) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
