@@ -1,6 +1,7 @@
 package com.gerson.projectpath_pro.calculation.service;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,7 +61,11 @@ public class CalculationServiceImpl implements CalculationService {
         // Update estimated_duration in database (this is our virtual finish node)
         int estimatedDuration = calculateEstimatedDuration(projectId, activities);
 
-        calculateBackwardPass(projectId, activities, estimatedDuration);
+        activities = calculateBackwardPass(projectId, activities, estimatedDuration);
+
+        activities = calculateSlack(projectId, activities);
+
+        calculateAndSaveCriticalPath(projectId, activities);
 
     }
 
@@ -142,7 +147,7 @@ public class CalculationServiceImpl implements CalculationService {
         return estimatedDuration;
     }
 
-    private void calculateBackwardPass(Long projectId, List<Activity> activities, int estimatedDuration) {
+    private List<Activity> calculateBackwardPass(Long projectId, List<Activity> activities, int estimatedDuration) {
         if (!projectService.isExists(projectId)) {
             throw new EntityNotFoundException("Project with id: " + projectId + " does not exist");
         }
@@ -184,6 +189,57 @@ public class CalculationServiceImpl implements CalculationService {
 
         // Save changes in database
         activityRepository.saveAll(activities);
+
+        return activities;
+    }
+
+    private List<Activity> calculateSlack(Long projectId, List<Activity> activities) {
+        if (!projectService.isExists(projectId)) {
+            throw new EntityNotFoundException("Project with id: " + projectId + " does not exist");
+        }
+
+        // Calculate slack for each activity
+        for (Activity activity : activities) {
+            int closeStart = activity.getCloseStart();
+            int distantStart = activity.getDistantStart();
+
+            // Formula: Slack = DS - CS = DF - CF
+            int slack = distantStart - closeStart;
+
+            // Update the activity with the slack value
+            activity.setSlack(slack);
+        }
+
+        // Save updates in database
+        activityRepository.saveAll(activities);
+
+        return activities;
+    }
+
+    private void calculateAndSaveCriticalPath(Long projectId, List<Activity> activities) {
+        if (!projectService.isExists(projectId)) {
+            throw new EntityNotFoundException("Project with id: " + projectId + " does not exist");
+        }
+
+        // Filter activitiees with slack 0
+        List<Activity> criticalPathActivities = activities.stream()
+                .filter(activity -> activity.getSlack() == 0)
+                .sorted(Comparator.comparingInt(Activity::getCloseStart)) // Order by closeStart
+                .collect(Collectors.toList());
+
+        // Build the critical path as a hyphen separated String "eg: A-C-F-H"
+        String criticalPath = criticalPathActivities.stream()
+                .map(Activity::getLabel)
+                .collect(Collectors.joining("-"));
+
+        // Save critical path in Calculation table
+        Calculation calculation = calculationRepository.findByProjectId(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("No calculation found for project id: " + projectId));
+
+        calculation.setCriticalPath(criticalPath);
+
+        // Save changes in database
+        calculationRepository.save(calculation);
     }
 
     @Override
