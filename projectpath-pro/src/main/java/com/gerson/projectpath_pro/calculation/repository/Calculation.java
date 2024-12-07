@@ -31,11 +31,11 @@ public class Calculation {
     
     @Column(nullable = false)
     @Comment("note: The format is hyphen-separated, for example: \"L-M-N-O-P\"")
-    private String critical_path;
+    private String criticalPath;
     
     @Column(nullable = false)
     @Comment("note: The value corresponds to days")
-    private Integer estimated_duration;
+    private Integer estimatedDuration;
     
     @OneToOne()
     @JoinColumn(name = "project_id", nullable = false)

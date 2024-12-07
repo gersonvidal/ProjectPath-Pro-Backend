@@ -93,7 +93,7 @@ public class CalculationRepositoryIntegrationTests {
         Calculation calculationA = TestDataUtil.createTestCalculationA(TestDataUtil.createTestProjectA());
         underTest.save(calculationA);
 
-        calculationA.setCritical_path("L-M-N");
+        calculationA.setCriticalPath("L-M-N");
         underTest.save(calculationA);
 
         Optional<Calculation> result = underTest.findById(calculationA.getId());

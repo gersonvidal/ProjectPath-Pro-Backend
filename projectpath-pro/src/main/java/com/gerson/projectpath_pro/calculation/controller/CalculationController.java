@@ -38,19 +38,26 @@ public class CalculationController {
 
     @PostMapping("/project/{id}")
     public ResponseEntity<byte[]> createNetworkAndCriticalPathDiagram(@PathVariable("id") Long projectId) {
-        byte[] pngBytes = calculationService.getNetworkAndCriticalPathDiagram(projectId);
+        try {
+            calculationService.makeAllCalculationsWhenNew(projectId);
 
-        if (pngBytes.length == 0) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            byte[] pngBytes = calculationService.getNetworkAndCriticalPathDiagram(projectId);
+
+            if (pngBytes.length == 0) {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_PNG);
+
+            return new ResponseEntity<>(
+                    pngBytes,
+                    headers,
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_PNG);
-
-        return new ResponseEntity<>(
-                pngBytes,
-                headers,
-                HttpStatus.OK);
 
     }
 

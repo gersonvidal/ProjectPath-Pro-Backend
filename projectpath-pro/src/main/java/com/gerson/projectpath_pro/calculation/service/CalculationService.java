@@ -8,6 +8,8 @@ public interface CalculationService {
 
     Optional<Calculation> getCalculationByProjectId(Long projectId);
 
+    void makeAllCalculationsWhenNew(Long projectId);
+
     byte[] getNetworkAndCriticalPathDiagram(Long projectId);
 
 }

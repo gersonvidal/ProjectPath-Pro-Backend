@@ -148,8 +148,8 @@ public class TestDataUtil {
     public static Calculation createTestCalculationA(Project project) {
         return Calculation.builder()
                 .id(1L)
-                .critical_path("L-M-N-O-P")
-                .estimated_duration(40)
+                .criticalPath("L-M-N-O-P")
+                .estimatedDuration(40)
                 .project(project)
                 .build();
     }
@@ -157,8 +157,8 @@ public class TestDataUtil {
     public static Calculation createTestCalculationB(Project project) {
         return Calculation.builder()
                 .id(2L)
-                .critical_path("B-C-D")
-                .estimated_duration(15)
+                .criticalPath("B-C-D")
+                .estimatedDuration(15)
                 .project(project)
                 .build();
     }
@@ -166,8 +166,8 @@ public class TestDataUtil {
     public static Calculation createTestCalculationC(Project project) {
         return Calculation.builder()
                 .id(3L)
-                .critical_path("B-C-D-E-F-G-H")
-                .estimated_duration(35)
+                .criticalPath("B-C-D-E-F-G-H")
+                .estimatedDuration(35)
                 .project(project)
                 .build();
     }
