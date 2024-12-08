@@ -1,6 +1,6 @@
 package com.gerson.projectpath_pro.auth.repository;
 
-import com.gerson.projectpath_pro.user.User;
+import com.gerson.projectpath_pro.user.repository.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

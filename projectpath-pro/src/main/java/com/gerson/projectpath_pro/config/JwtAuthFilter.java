@@ -16,8 +16,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.gerson.projectpath_pro.auth.repository.Token;
 import com.gerson.projectpath_pro.auth.repository.TokenRepository;
 import com.gerson.projectpath_pro.auth.service.JwtService;
-import com.gerson.projectpath_pro.user.User;
-import com.gerson.projectpath_pro.user.UserRepository;
+import com.gerson.projectpath_pro.user.repository.User;
+import com.gerson.projectpath_pro.user.repository.UserRepository;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

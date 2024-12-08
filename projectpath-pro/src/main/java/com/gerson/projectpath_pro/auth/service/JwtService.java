@@ -8,7 +8,7 @@ import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.gerson.projectpath_pro.user.User;
+import com.gerson.projectpath_pro.user.repository.User;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
