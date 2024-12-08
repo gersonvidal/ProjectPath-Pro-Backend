@@ -38,6 +38,11 @@ public class ProjectServiceImpl implements ProjectService {
         return projectRepository.findById(id);
     }
 
+    @Override 
+    public List<Project> findByUserId(Long userId) {
+        return projectRepository.findByUserId(userId);
+    }
+
     @Override
     public boolean isExists(Long id) {
         return projectRepository.existsById(id);
@@ -50,7 +55,6 @@ public class ProjectServiceImpl implements ProjectService {
         return projectRepository.findById(id).map(existingProject -> {
             Optional.ofNullable(project.getName()).ifPresent(existingProject::setName);
             Optional.ofNullable(project.getDescription()).ifPresent(existingProject::setDescription);
-            // TODO: Calculations
 
             return projectRepository.save(existingProject);
         }).orElseThrow(() -> new RuntimeException("Project does not exists"));

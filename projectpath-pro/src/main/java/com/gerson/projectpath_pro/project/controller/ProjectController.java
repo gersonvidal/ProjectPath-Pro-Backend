@@ -36,6 +36,14 @@ public class ProjectController {
 
     @PostMapping
     public ResponseEntity<ProjectDto> createProject(@RequestBody ProjectDto projectDto) {
+        if (projectDto.getUserDto() == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (projectDto.getUserDto().getId() == null || projectDto.getUserDto().getId() < 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         Project project = projectMapper.mapFrom(projectDto);
 
         Project savedProject = projectService.save(project);
@@ -60,6 +68,22 @@ public class ProjectController {
             ProjectDto projectDto = projectMapper.mapTo(project);
             return new ResponseEntity<>(projectDto, HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping(path = "/user/{id}")
+    public ResponseEntity<List<ProjectDto>> getProjectsByUserId(@PathVariable("id") Long userId) {
+        if (userId == null || userId < 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        List<Project> projects = projectService.findByUserId(userId);
+
+        List<ProjectDto> projectDtos = projects.stream()
+                .map(projectMapper::mapTo)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(projectDtos, HttpStatus.OK);
+
     }
 
     @PutMapping(path = "/{id}")
