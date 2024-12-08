@@ -7,7 +7,7 @@ import com.gerson.projectpath_pro.activity.repository.Activity;
 public interface DiagramService {
 
     String generatePlantUml(List<Activity> activities, List<Activity> startActivities,
-            List<Activity> endActivities);
+            List<Activity> endActivities, String criticalPath, Integer estimatedDuration);
 
     byte[] generateDiagram(String source);
 
