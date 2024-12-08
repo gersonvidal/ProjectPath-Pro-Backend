@@ -32,11 +32,12 @@ public class DiagramServiceImpl implements DiagramService {
 
         // Note with the default values of the initial virtual node
         plantUml.append("note top\n")
-                .append("  IC: ").append("0").append(", TC: ")
+                .append("Inicio\n")
+                .append("IC: ").append("0").append(", TC: ")
                 .append("0").append("\n")
-                .append("  IL: ").append("0").append(", TL: ")
+                .append("IL: ").append("0").append(", TL: ")
                 .append("0").append("\n")
-                .append("  Dur: ").append("0").append(", Holgura: ")
+                .append("Dur: ").append("0").append(", Holgura: ")
                 .append("0").append("\n")
                 .append("end note\n");
 
@@ -49,11 +50,12 @@ public class DiagramServiceImpl implements DiagramService {
                     .append("\n");
 
             plantUml.append("note bottom\n")
-                    .append("  IC: ").append(activity.getCloseStart()).append(", TC: ")
+                    .append(activity.getName() + "\n")
+                    .append("IC: ").append(activity.getCloseStart()).append(", TC: ")
                     .append(activity.getCloseFinish()).append("\n")
-                    .append("  IL: ").append(activity.getDistantStart()).append(", TL: ")
+                    .append("IL: ").append(activity.getDistantStart()).append(", TL: ")
                     .append(activity.getDistantFinish()).append("\n")
-                    .append("  Dur: ").append(activity.getDaysDuration()).append(", Holgura: ")
+                    .append("Dur: ").append(activity.getDaysDuration()).append(", Holgura: ")
                     .append(activity.getSlack()).append("\n")
                     .append("end note\n");
 
@@ -81,11 +83,12 @@ public class DiagramServiceImpl implements DiagramService {
                     // If the label is already in the set returns false, otherwise true
                     if (notedActivities.add(label)) {
                         plantUml.append("note bottom\n")
-                                .append("  IC: ").append(activity.getCloseStart()).append(", TC: ")
+                                .append(activity.getName() + "\n")
+                                .append("IC: ").append(activity.getCloseStart()).append(", TC: ")
                                 .append(activity.getCloseFinish()).append("\n")
-                                .append("  IL: ").append(activity.getDistantStart()).append(", TL: ")
+                                .append("IL: ").append(activity.getDistantStart()).append(", TL: ")
                                 .append(activity.getDistantFinish()).append("\n")
-                                .append("  Dur: ").append(activity.getDaysDuration()).append(", Holgura: ")
+                                .append("Dur: ").append(activity.getDaysDuration()).append(", Holgura: ")
                                 .append(activity.getSlack()).append("\n")
                                 .append("end note\n");
                     }
@@ -109,11 +112,12 @@ public class DiagramServiceImpl implements DiagramService {
         // The estimated duration = CS, CF, DS, DF
         // This is the virtual final node
         plantUml.append("note bottom\n")
-                .append("  IC: ").append(estimatedDuration).append(", TC: ")
+                .append("Final\n")
+                .append("IC: ").append(estimatedDuration).append(", TC: ")
                 .append(estimatedDuration).append("\n")
-                .append("  IL: ").append(estimatedDuration).append(", TL: ")
+                .append("IL: ").append(estimatedDuration).append(", TL: ")
                 .append(estimatedDuration).append("\n")
-                .append("  Dur: ").append("0").append(", Holgura: ")
+                .append("Dur: ").append("0").append(", Holgura: ")
                 .append("0").append("\n")
                 .append("end note\n");
 
