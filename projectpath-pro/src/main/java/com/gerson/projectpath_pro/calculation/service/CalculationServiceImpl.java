@@ -255,7 +255,15 @@ public class CalculationServiceImpl implements CalculationService {
         // Find last activities (the ones thar are not predecessors of any activity)
         List<Activity> endActivities = getEndActivities(projectId, activities);
 
-        String source = diagramService.generatePlantUml(activities, startActivities, endActivities);
+        Calculation calculation = calculationRepository.findByProjectId(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Calculation not found with project id: " + projectId));
+
+        String criticalPath = calculation.getCriticalPath();
+
+        Integer estimatedDuration = calculation.getEstimatedDuration();
+
+        String source = diagramService.generatePlantUml(activities, startActivities, endActivities, criticalPath,
+                estimatedDuration);
 
         byte[] pngBytes = diagramService.generateDiagram(source);
 
