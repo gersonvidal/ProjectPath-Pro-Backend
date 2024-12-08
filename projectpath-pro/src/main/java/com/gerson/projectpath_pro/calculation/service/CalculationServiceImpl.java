@@ -1,6 +1,7 @@
 package com.gerson.projectpath_pro.calculation.service;
 
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -243,7 +244,7 @@ public class CalculationServiceImpl implements CalculationService {
     }
 
     @Override
-    public byte[] getNetworkAndCriticalPathDiagram(Long projectId) {
+    public String getNetworkAndCriticalPathDiagram(Long projectId) {
         if (!projectService.isExists(projectId)) {
             throw new EntityNotFoundException("Project with id: " + projectId + " does not exist");
         }
@@ -267,7 +268,7 @@ public class CalculationServiceImpl implements CalculationService {
 
         byte[] pngBytes = diagramService.generateDiagram(source);
 
-        return pngBytes;
+        return Base64.getEncoder().encodeToString(pngBytes);
     }
 
     private List<Activity> getStartActivities(Long projectId, List<Activity> activities) {

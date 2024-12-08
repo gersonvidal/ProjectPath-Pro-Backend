@@ -2,9 +2,7 @@ package com.gerson.projectpath_pro.calculation.controller;
 
 import java.util.Optional;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,28 +33,23 @@ public class CalculationController {
     }
 
     @PostMapping("/project/{id}")
-    public ResponseEntity<byte[]> createNetworkAndCriticalPathDiagram(@PathVariable("id") Long projectId) {
+    public ResponseEntity<String> createNetworkAndCriticalPathDiagram(@PathVariable("id") Long projectId) {
         try {
             calculationService.makeAllCalculationsWhenNew(projectId);
 
-            byte[] pngBytes = calculationService.getNetworkAndCriticalPathDiagram(projectId);
+            String base64Image = calculationService.getNetworkAndCriticalPathDiagram(projectId);
 
-            if (pngBytes.length == 0) {
+            if (base64Image == null || base64Image.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.IMAGE_PNG);
-
             return new ResponseEntity<>(
-                    pngBytes,
-                    headers,
+                    base64Image,
                     HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
     }
 
     @GetMapping("/project/{id}")
