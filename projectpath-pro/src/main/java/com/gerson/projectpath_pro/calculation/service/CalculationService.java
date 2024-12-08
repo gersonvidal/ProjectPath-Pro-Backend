@@ -10,6 +10,6 @@ public interface CalculationService {
 
     void makeAllCalculationsWhenNew(Long projectId);
 
-    byte[] getNetworkAndCriticalPathDiagram(Long projectId);
+    String getNetworkAndCriticalPathDiagram(Long projectId);
 
 }
