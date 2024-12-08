@@ -66,6 +66,17 @@ public class CalculationController {
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @GetMapping("/project/diagram/{id}")
+    public ResponseEntity<String> getNetworkAndCriticalPathDiagram(@PathVariable("id") Long projectId) {
+        String base64Image = calculationService.getNetworkAndCriticalPathDiagram(projectId);
+
+        if (base64Image == null || base64Image.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(base64Image, HttpStatus.OK);
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());

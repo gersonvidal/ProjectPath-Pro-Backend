@@ -71,7 +71,7 @@ public class DiagramServiceImpl implements DiagramService {
             if (activity.getPredecessors() != null) {
                 for (String predecessor : activity.getPredecessors().split(",")) {
 
-                    // Verify if the activitya and its predecessor are in the critical path
+                    // Verify if the activity and its predecessor are in the critical path
                     boolean isCritical = criticalPathLabels.contains(label) && criticalPathLabels.contains(predecessor);
 
                     plantUml.append("\"" + predecessor + "\"")
