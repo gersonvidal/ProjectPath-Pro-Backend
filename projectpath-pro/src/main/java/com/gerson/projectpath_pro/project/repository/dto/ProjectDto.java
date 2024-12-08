@@ -1,5 +1,7 @@
 package com.gerson.projectpath_pro.project.repository.dto;
 
+import com.gerson.projectpath_pro.user.repository.dto.UserDto;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +19,6 @@ public class ProjectDto {
 
     private String description;
 
-    // TODO: DTO private Calculation calculation;
+    private UserDto userDto;
 
 }
