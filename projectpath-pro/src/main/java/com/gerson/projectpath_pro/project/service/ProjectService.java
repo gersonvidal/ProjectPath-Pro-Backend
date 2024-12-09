@@ -13,6 +13,8 @@ public interface ProjectService {
 
     Optional<Project> findById(Long id);
 
+    List<Project> findByUserId(Long userId);
+
     boolean isExists(Long id);
 
     Project partialUpdate(Long id, Project project);

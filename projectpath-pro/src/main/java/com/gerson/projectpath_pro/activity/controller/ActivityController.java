@@ -22,6 +22,7 @@ import com.gerson.projectpath_pro.activity.repository.dto.ActivityPostRequestDto
 import com.gerson.projectpath_pro.activity.repository.dto.ActivityPatchRequestDto;
 import com.gerson.projectpath_pro.activity.service.ActivityService;
 import com.gerson.projectpath_pro.mappers.Mapper;
+import com.gerson.projectpath_pro.utils.StringValidator;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -48,13 +49,25 @@ public class ActivityController {
         this.activityPatchRequestMapper = activityPatchRequestMapper;
     }
 
-    // TODO: Validate label is in uppercase
-    // TODO: Validate that predecessors is not recursive (e.g Activity E doesn't
-    // contain A,B,C,D,E)
-    // TODO: Validate that Activity E is > predecessors (splitting them into a
-    // String[] and then number for comparison)
     @PostMapping
     public ResponseEntity<ActivityDto> createActivity(@RequestBody ActivityPostRequestDto activityPostRequestDto) {
+
+        if (!StringValidator.isValidLabelString(activityPostRequestDto.getLabel())) {
+            System.out.println("checo si es valido");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (!StringValidator.predecessorsIsNotRecursive(activityPostRequestDto.getPredecessors(),
+                activityPostRequestDto.getLabel())) {
+            System.out.println("checo si no es recursivo");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (!StringValidator.isLabelGreaterThanPredecessors(activityPostRequestDto.getPredecessors(),
+                activityPostRequestDto.getLabel())) {
+            System.out.println("checo si es mayor el orden");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         if (activityPostRequestDto.getName() == null || activityPostRequestDto.getName().isBlank()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -66,6 +79,7 @@ public class ActivityController {
 
         if (activityPostRequestDto.getPredecessors() != null
                 && !activityPostRequestDto.getPredecessors().matches(REGEX_PATTERN)) {
+            System.out.println("checo regex");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -141,10 +155,6 @@ public class ActivityController {
     // HttpStatus.OK);
     // }
 
-    // TODO: Validate that predecessors is not recursive (e.g Activity E doesn't
-    // contain A,B,C,D,E)
-    // TODO: Validate that Activity E is > predecessors (splitting them into a
-    // String[] and then number for comparison)
     @PatchMapping(path = "/{id}")
     public ResponseEntity<ActivityDto> partialUpdate(
             @PathVariable("id") Long id,
@@ -184,15 +194,20 @@ public class ActivityController {
     }
 
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity deleteActivity(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteActivity(@PathVariable("id") Long id) {
         activityService.delete(id);
 
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
 }
