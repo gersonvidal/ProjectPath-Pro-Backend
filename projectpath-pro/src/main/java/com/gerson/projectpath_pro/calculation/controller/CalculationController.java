@@ -34,6 +34,10 @@ public class CalculationController {
 
     @PostMapping("/project/{id}")
     public ResponseEntity<String> createNetworkAndCriticalPathDiagram(@PathVariable("id") Long projectId) {
+        if (projectId == null || projectId < 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         try {
             calculationService.makeAllCalculationsWhenNew(projectId);
 
@@ -68,6 +72,10 @@ public class CalculationController {
 
     @GetMapping("/project/diagram/{id}")
     public ResponseEntity<String> getNetworkAndCriticalPathDiagram(@PathVariable("id") Long projectId) {
+        if (projectId == null || projectId < 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        
         String base64Image = calculationService.getNetworkAndCriticalPathDiagram(projectId);
 
         if (base64Image == null || base64Image.isEmpty()) {

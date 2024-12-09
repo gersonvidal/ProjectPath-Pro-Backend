@@ -11,6 +11,7 @@ import com.gerson.projectpath_pro.activity.repository.Activity;
 import com.gerson.projectpath_pro.activity.repository.ActivityRepository;
 import com.gerson.projectpath_pro.project.service.ProjectService;
 import com.gerson.projectpath_pro.utils.CustomStringComparator;
+import com.gerson.projectpath_pro.utils.StringValidator;
 import com.gerson.projectpath_pro.utils.UtilClass;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -79,6 +80,21 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setId(id);
 
         return activityRepository.findById(id).map(existingActivity -> {
+
+            // Validations
+            if (!StringValidator.predecessorsIsNotRecursive(activity.getPredecessors(),
+                    existingActivity.getLabel())) {
+                System.out.println("checo si no es recursivo");
+                throw new IllegalArgumentException("Activity Label cannot be in Predecessors.");
+            }
+
+            if (!StringValidator.isLabelGreaterThanPredecessors(activity.getPredecessors(),
+                    existingActivity.getLabel())) {
+                System.out.println("checo si es mayor el orden");
+                throw new IllegalArgumentException("Activity Label cannot be lower than Predecessor.");
+            }
+
+            // Updates
             Optional.ofNullable(activity.getName()).ifPresent(existingActivity::setName);
             // Optional.ofNullable(activity.getLabel()).ifPresent(existingActivity::setLabel);
             existingActivity.setPredecessors(activity.getPredecessors()); // Updates it with null or valid predecessors
