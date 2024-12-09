@@ -36,6 +36,18 @@ public class ProjectController {
 
     @PostMapping
     public ResponseEntity<ProjectDto> createProject(@RequestBody ProjectDto projectDto) {
+        if (projectDto.getName() == null || projectDto.getName().isBlank()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (projectDto.getUserDto() == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (projectDto.getUserDto().getId() == null || projectDto.getUserDto().getId() < 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         Project project = projectMapper.mapFrom(projectDto);
 
         Project savedProject = projectService.save(project);
@@ -62,6 +74,22 @@ public class ProjectController {
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @GetMapping(path = "/user/{id}")
+    public ResponseEntity<List<ProjectDto>> getProjectsByUserId(@PathVariable("id") Long userId) {
+        if (userId == null || userId < 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        List<Project> projects = projectService.findByUserId(userId);
+
+        List<ProjectDto> projectDtos = projects.stream()
+                .map(projectMapper::mapTo)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(projectDtos, HttpStatus.OK);
+
+    }
+
     @PutMapping(path = "/{id}")
     public ResponseEntity<ProjectDto> fullUpdateProject(
             @PathVariable("id") Long id,
@@ -69,6 +97,18 @@ public class ProjectController {
 
         if (!projectService.isExists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        if (projectDto.getName() == null || projectDto.getName().isBlank()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (projectDto.getUserDto() == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (projectDto.getUserDto().getId() == null || projectDto.getUserDto().getId() < 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         projectDto.setId(id);
@@ -96,14 +136,13 @@ public class ProjectController {
         return new ResponseEntity<>(
                 projectMapper.mapTo(updatedProject),
                 HttpStatus.OK);
-
     }
 
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity deleteProject(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteProject(@PathVariable("id") Long id) {
         projectService.delete(id);
 
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

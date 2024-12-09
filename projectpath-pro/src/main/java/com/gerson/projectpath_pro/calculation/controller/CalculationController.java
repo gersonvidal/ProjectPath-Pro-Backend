@@ -34,6 +34,10 @@ public class CalculationController {
 
     @PostMapping("/project/{id}")
     public ResponseEntity<String> createNetworkAndCriticalPathDiagram(@PathVariable("id") Long projectId) {
+        if (projectId == null || projectId < 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         try {
             calculationService.makeAllCalculationsWhenNew(projectId);
 
@@ -64,6 +68,21 @@ public class CalculationController {
             CalculationDto calculationDto = calculationMapper.mapTo(calculation);
             return new ResponseEntity<>(calculationDto, HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping("/project/diagram/{id}")
+    public ResponseEntity<String> getNetworkAndCriticalPathDiagram(@PathVariable("id") Long projectId) {
+        if (projectId == null || projectId < 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        
+        String base64Image = calculationService.getNetworkAndCriticalPathDiagram(projectId);
+
+        if (base64Image == null || base64Image.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(base64Image, HttpStatus.OK);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
