@@ -36,6 +36,10 @@ public class ProjectController {
 
     @PostMapping
     public ResponseEntity<ProjectDto> createProject(@RequestBody ProjectDto projectDto) {
+        if (projectDto.getName() == null || projectDto.getName().isBlank()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         if (projectDto.getUserDto() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -95,6 +99,18 @@ public class ProjectController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
+        if (projectDto.getName() == null || projectDto.getName().isBlank()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (projectDto.getUserDto() == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (projectDto.getUserDto().getId() == null || projectDto.getUserDto().getId() < 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         projectDto.setId(id);
         Project project = projectMapper.mapFrom(projectDto);
 
@@ -120,14 +136,13 @@ public class ProjectController {
         return new ResponseEntity<>(
                 projectMapper.mapTo(updatedProject),
                 HttpStatus.OK);
-
     }
 
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity deleteProject(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteProject(@PathVariable("id") Long id) {
         projectService.delete(id);
 
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }
