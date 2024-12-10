@@ -10,6 +10,8 @@ public interface CalculationService {
 
     void makeAllCalculationsWhenNew(Long projectId);
 
+    void makeAllCalculationsWhenAlreadyExists(Long projectid);
+
     String getNetworkAndCriticalPathDiagram(Long projectId);
 
 }
