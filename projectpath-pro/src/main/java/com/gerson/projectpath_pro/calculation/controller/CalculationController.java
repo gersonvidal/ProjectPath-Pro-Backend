@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +34,7 @@ public class CalculationController {
     }
 
     @PostMapping("/project/{id}")
-    public ResponseEntity<String> createNetworkAndCriticalPathDiagram(@PathVariable("id") Long projectId) {
+    public ResponseEntity<String> createAndGetNetworkAndCriticalPathDiagram(@PathVariable("id") Long projectId) {
         if (projectId == null || projectId < 1) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -56,6 +57,31 @@ public class CalculationController {
         }
     }
 
+    @PatchMapping("/project/diagram/{id}")
+    public ResponseEntity<String> updateAndGetNetworkAndCriticalPathDiagram(@PathVariable("id") Long projectId) {
+        if (projectId == null || projectId < 1) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            calculationService.makeAllCalculationsWhenAlreadyExists(projectId);
+
+            String base64Image = calculationService.getNetworkAndCriticalPathDiagram(projectId);
+
+            if (base64Image == null || base64Image.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            return new ResponseEntity<>(
+                    base64Image,
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+    }
+
     @GetMapping("/project/{id}")
     public ResponseEntity<CalculationDto> getCalculationByProjectId(@PathVariable("id") Long projectId) {
         if (projectId == null || projectId < 1) {
@@ -75,7 +101,7 @@ public class CalculationController {
         if (projectId == null || projectId < 1) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        
+
         String base64Image = calculationService.getNetworkAndCriticalPathDiagram(projectId);
 
         if (base64Image == null || base64Image.isEmpty()) {
