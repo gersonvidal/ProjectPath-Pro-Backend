@@ -20,6 +20,7 @@ import com.gerson.projectpath_pro.calculation.repository.CalculationRepository;
 import com.gerson.projectpath_pro.diagram.service.DiagramService;
 import com.gerson.projectpath_pro.project.repository.Project;
 import com.gerson.projectpath_pro.project.service.ProjectService;
+import com.gerson.projectpath_pro.utils.CustomStringComparator;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -70,6 +71,21 @@ public class CalculationServiceImpl implements CalculationService {
 
     }
 
+    @Override
+    @Transactional
+    public void makeAllCalculationsWhenAlreadyExists(Long projectId) {
+        List<Activity> activities = calculateForwardPass(projectId);
+
+        // Update estimated_duration in database (this is our virtual finish node)
+        int estimatedDuration = calculateEstimatedDuration(projectId, activities);
+
+        activities = calculateBackwardPass(projectId, activities, estimatedDuration);
+
+        activities = calculateSlack(projectId, activities);
+
+        calculateAndSaveCriticalPath(projectId, activities);
+    }
+
     private Calculation createEmptyCalculation(Long projectId) {
         Project project = projectService.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found with project id: " + projectId));
@@ -90,6 +106,9 @@ public class CalculationServiceImpl implements CalculationService {
         }
 
         List<Activity> activities = activityRepository.findByProjectId(projectId);
+
+        // Order the activities when we first get them
+        activities = orderActivitiesByLabel(activities);
 
         // Map to store calculated times
         Map<String, Activity> activityMap = activities.stream()
@@ -222,7 +241,7 @@ public class CalculationServiceImpl implements CalculationService {
             throw new EntityNotFoundException("Project with id: " + projectId + " does not exist");
         }
 
-        // Filter activitiees with slack 0
+        // Filter activities with slack 0
         List<Activity> criticalPathActivities = activities.stream()
                 .filter(activity -> activity.getSlack() == 0)
                 .sorted(Comparator.comparingInt(Activity::getCloseStart)) // Order by closeStart
@@ -302,4 +321,16 @@ public class CalculationServiceImpl implements CalculationService {
         return endActivities;
     }
 
+    private List<Activity> orderActivitiesByLabel(List<Activity> activities) {
+        if (activities == null || activities.isEmpty()) {
+            return activities; // Returns the original list
+        }
+
+        // Use CustomStringComparator to order activities by its label
+        CustomStringComparator comparator = new CustomStringComparator();
+
+        return activities.stream()
+                .sorted((a1, a2) -> comparator.compare(a1.getLabel(), a2.getLabel()))
+                .collect(Collectors.toList());
+    }
 }
