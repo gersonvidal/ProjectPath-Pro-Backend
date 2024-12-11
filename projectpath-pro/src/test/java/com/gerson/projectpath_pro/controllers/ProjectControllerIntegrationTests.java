@@ -19,6 +19,8 @@ import com.gerson.projectpath_pro.TestDataUtil;
 import com.gerson.projectpath_pro.project.repository.Project;
 import com.gerson.projectpath_pro.project.repository.dto.ProjectDto;
 import com.gerson.projectpath_pro.project.service.ProjectService;
+import com.gerson.projectpath_pro.user.repository.User;
+import com.gerson.projectpath_pro.user.service.UserService;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -28,6 +30,8 @@ public class ProjectControllerIntegrationTests {
 
         private ProjectService projectService;
 
+        private UserService userService;
+
         private MockMvc mockMvc;
 
         private ObjectMapper objectMapper;
@@ -36,8 +40,10 @@ public class ProjectControllerIntegrationTests {
         private TestAuthUtil testAuthUtil;
 
         @Autowired
-        public ProjectControllerIntegrationTests(ProjectService projectService, MockMvc mockMvc) {
+        public ProjectControllerIntegrationTests(ProjectService projectService, UserService userService,
+                        MockMvc mockMvc) {
                 this.projectService = projectService;
+                this.userService = userService;
                 this.mockMvc = mockMvc;
                 this.objectMapper = new ObjectMapper();
         }
@@ -45,8 +51,9 @@ public class ProjectControllerIntegrationTests {
         @Test
         public void testThatCreateProjectSuccesfullyReturnsHttp201Created() throws Exception {
                 String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
 
-                Project testProjectA = TestDataUtil.createTestProjectA();
+                Project testProjectA = TestDataUtil.createTestProjectA(user);
                 testProjectA.setId(null);
 
                 String projectJson = objectMapper.writeValueAsString(testProjectA);
@@ -64,7 +71,7 @@ public class ProjectControllerIntegrationTests {
         public void testThatCreateProjectSuccesfullyReturnsSavedProject() throws Exception {
                 String testJwtToken = testAuthUtil.generateTestJwtToken();
 
-                ProjectDto testProjectDtoA = TestDataUtil.createTestProjectDtoA();
+                ProjectDto testProjectDtoA = TestDataUtil.createTestProjectDtoA(TestDataUtil.createTestUserDtoA());
                 testProjectDtoA.setId(null);
 
                 String projectDtoJson = objectMapper.writeValueAsString(testProjectDtoA);
@@ -98,10 +105,11 @@ public class ProjectControllerIntegrationTests {
 
         @Test
         public void testThatListProjectsReturnsListOfProjects() throws Exception {
-                Project testProjectA = TestDataUtil.createTestProjectA();
-                projectService.save(testProjectA);
-
                 String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
+
+                Project testProjectA = TestDataUtil.createTestProjectA(user);
+                projectService.save(testProjectA);
 
                 mockMvc.perform(
                                 MockMvcRequestBuilders.get("/api/projects")
@@ -120,10 +128,11 @@ public class ProjectControllerIntegrationTests {
 
         @Test
         public void testThatGetProjectReturnsHttpStatus200WhenProjectExists() throws Exception {
-                Project testProjectA = TestDataUtil.createTestProjectA();
-                projectService.save(testProjectA);
-
                 String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
+
+                Project testProjectA = TestDataUtil.createTestProjectA(user);
+                projectService.save(testProjectA);
 
                 mockMvc.perform(
                                 MockMvcRequestBuilders.get("/api/projects/1")
@@ -136,10 +145,11 @@ public class ProjectControllerIntegrationTests {
 
         @Test
         public void testThatGetProjectReturnsProjectWhenProjectExists() throws Exception {
-                Project testProjectA = TestDataUtil.createTestProjectA();
-                projectService.save(testProjectA);
-
                 String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
+
+                Project testProjectA = TestDataUtil.createTestProjectA(user);
+                projectService.save(testProjectA);
 
                 mockMvc.perform(
                                 MockMvcRequestBuilders.get("/api/projects/1")
@@ -170,13 +180,14 @@ public class ProjectControllerIntegrationTests {
 
         @Test
         public void testThatFullUpdateProjectReturnsHttpStatus200WhenProjectExists() throws Exception {
-                Project testProjectA = TestDataUtil.createTestProjectA();
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
+
+                Project testProjectA = TestDataUtil.createTestProjectA(user);
                 Project savedProject = projectService.save(testProjectA);
 
-                ProjectDto testProjectDtoA = TestDataUtil.createTestProjectDtoA();
+                ProjectDto testProjectDtoA = TestDataUtil.createTestProjectDtoA(TestDataUtil.createTestUserDtoA());
                 String projectDtoJson = objectMapper.writeValueAsString(testProjectDtoA);
-
-                String testJwtToken = testAuthUtil.generateTestJwtToken();
 
                 mockMvc.perform(
                                 MockMvcRequestBuilders.put("/api/projects/" + savedProject.getId())
@@ -190,15 +201,16 @@ public class ProjectControllerIntegrationTests {
 
         @Test
         public void testThatFullUpdateUpdatesExistingProject() throws Exception {
-                Project testProjectA = TestDataUtil.createTestProjectA();
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
+
+                Project testProjectA = TestDataUtil.createTestProjectA(user);
                 Project savedProject = projectService.save(testProjectA);
 
-                ProjectDto testProjectDtoB = TestDataUtil.createTestProjectDtoB();
+                ProjectDto testProjectDtoB = TestDataUtil.createTestProjectDtoB(TestDataUtil.createTestUserDtoA());
                 testProjectDtoB.setId(savedProject.getId());
 
                 String projectDtoBJson = objectMapper.writeValueAsString(testProjectDtoB);
-
-                String testJwtToken = testAuthUtil.generateTestJwtToken();
 
                 mockMvc.perform(
                                 MockMvcRequestBuilders.put("/api/projects/" + savedProject.getId())
@@ -217,10 +229,10 @@ public class ProjectControllerIntegrationTests {
 
         @Test
         public void testThatFullUpdateProjectReturnsHttpStatus404WhenProjectDoesntExists() throws Exception {
-                ProjectDto testProjectDtoA = TestDataUtil.createTestProjectDtoA();
-                String projectDtoJson = objectMapper.writeValueAsString(testProjectDtoA);
-
                 String testJwtToken = testAuthUtil.generateTestJwtToken();
+
+                ProjectDto testProjectDtoA = TestDataUtil.createTestProjectDtoA(TestDataUtil.createTestUserDtoA());
+                String projectDtoJson = objectMapper.writeValueAsString(testProjectDtoA);
 
                 mockMvc.perform(
                                 MockMvcRequestBuilders.put("/api/projects/1")
@@ -234,15 +246,16 @@ public class ProjectControllerIntegrationTests {
 
         @Test
         public void testThatPartialUpdateExistingProjectReturnsHttpStatus200() throws Exception {
-                Project testProjectA = TestDataUtil.createTestProjectA();
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
+
+                Project testProjectA = TestDataUtil.createTestProjectA(user);
                 Project savedProject = projectService.save(testProjectA);
 
-                ProjectDto testProjectDtoA = TestDataUtil.createTestProjectDtoA();
+                ProjectDto testProjectDtoA = TestDataUtil.createTestProjectDtoA(TestDataUtil.createTestUserDtoA());
                 testProjectDtoA.setName("Facebook");
 
                 String projectDtoJson = objectMapper.writeValueAsString(testProjectDtoA);
-
-                String testJwtToken = testAuthUtil.generateTestJwtToken();
 
                 mockMvc.perform(
                                 MockMvcRequestBuilders.patch("/api/projects/" + savedProject.getId())
@@ -256,15 +269,16 @@ public class ProjectControllerIntegrationTests {
 
         @Test
         public void testThatPartialUpdateExistingProjectReturnsUpdatedProject() throws Exception {
-                Project testProjectA = TestDataUtil.createTestProjectA();
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
+
+                Project testProjectA = TestDataUtil.createTestProjectA(user);
                 Project savedProject = projectService.save(testProjectA);
 
-                ProjectDto testProjectDtoA = TestDataUtil.createTestProjectDtoA();
+                ProjectDto testProjectDtoA = TestDataUtil.createTestProjectDtoA(TestDataUtil.createTestUserDtoA());
                 testProjectDtoA.setName("Facebook");
 
                 String projectDtoJson = objectMapper.writeValueAsString(testProjectDtoA);
-
-                String testJwtToken = testAuthUtil.generateTestJwtToken();
 
                 mockMvc.perform(
                                 MockMvcRequestBuilders.patch("/api/projects/" + savedProject.getId())
@@ -297,10 +311,11 @@ public class ProjectControllerIntegrationTests {
 
         @Test
         public void testThatDeleteProjectReturnsHttpStatus204ForExistingProject() throws Exception {
-                Project testProjectA = TestDataUtil.createTestProjectA();
-                Project savedProject = projectService.save(testProjectA);
-
                 String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
+
+                Project testProjectA = TestDataUtil.createTestProjectA(user);
+                Project savedProject = projectService.save(testProjectA);
 
                 mockMvc.perform(
                                 MockMvcRequestBuilders.delete("/api/projects/" + savedProject.getId())

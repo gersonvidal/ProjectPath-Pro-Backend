@@ -17,6 +17,10 @@ public interface ActivityService {
 
     boolean isExists(Long id);
 
+    boolean predecessorsActivitiesExists(String predecessors, Long projectId);
+
+    void validateActivitiesAreComplete(Long projectId);
+
     Activity partialUpdate(Long id, Activity activity);
 
     void delete(Long id);
