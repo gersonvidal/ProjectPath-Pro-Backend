@@ -92,6 +92,12 @@ public class ActivityController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        if (!activityService.predecessorsActivitiesExists(
+                activityPostRequestDto.getPredecessors(),
+                activityPostRequestDto.getProjectDto().getId())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         Activity activity = activityPostRequestMapper.mapFrom(activityPostRequestDto);
 
         Activity savedActivity = activityService.save(activity);

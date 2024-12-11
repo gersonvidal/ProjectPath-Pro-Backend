@@ -35,6 +35,7 @@ public class CalculationServiceImpl implements CalculationService {
 
     private DiagramService diagramService;
 
+
     public CalculationServiceImpl(CalculationRepository calculationRepository, ActivityRepository activityRepository,
             ProjectService projectService, DiagramService diagramService) {
         this.calculationRepository = calculationRepository;

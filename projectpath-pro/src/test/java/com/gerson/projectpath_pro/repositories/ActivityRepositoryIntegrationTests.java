@@ -6,11 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gerson.projectpath_pro.TestDataUtil;
 import com.gerson.projectpath_pro.activity.repository.Activity;
 import com.gerson.projectpath_pro.activity.repository.ActivityRepository;
 import com.gerson.projectpath_pro.project.repository.ProjectRepository;
+import com.gerson.projectpath_pro.user.repository.User;
+import com.gerson.projectpath_pro.user.repository.UserRepository;
 
 import java.util.Optional;
 
@@ -25,17 +28,23 @@ public class ActivityRepositoryIntegrationTests {
 
     private ProjectRepository projectRepository;
 
+    private UserRepository userRepository;
+
     @Autowired
-    public ActivityRepositoryIntegrationTests(ActivityRepository underTest, ProjectRepository projectRepository) {
+    public ActivityRepositoryIntegrationTests(ActivityRepository underTest, ProjectRepository projectRepository,
+            UserRepository userRepository) {
         this.underTest = underTest;
         this.projectRepository = projectRepository;
+        this.userRepository = userRepository;
     }
 
+    @Transactional
     @Test
     public void testThatActivityCanBeCreatedAndRecalled() {
-        projectRepository.save(TestDataUtil.createTestProjectA());
+        User savedUser = userRepository.save(TestDataUtil.createTestUserA());
+        projectRepository.save(TestDataUtil.createTestProjectA(savedUser));
 
-        Activity activity = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA());
+        Activity activity = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA(savedUser));
         underTest.save(activity);
 
         Optional<Activity> result = underTest.findById(activity.getId());
@@ -44,19 +53,22 @@ public class ActivityRepositoryIntegrationTests {
         assertThat(result.get()).isEqualTo(activity);
     }
 
+    @Transactional
     @Test
     public void testThatMultipleActivitesCanBeCreatedAndRecalled() {
-        projectRepository.save(TestDataUtil.createTestProjectA());
-        projectRepository.save(TestDataUtil.createTestProjectB());
-        projectRepository.save(TestDataUtil.createTestProjectC());
+        User savedUser = userRepository.save(TestDataUtil.createTestUserA());
 
-        Activity activityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA());
+        projectRepository.save(TestDataUtil.createTestProjectA(savedUser));
+        projectRepository.save(TestDataUtil.createTestProjectB(savedUser));
+        projectRepository.save(TestDataUtil.createTestProjectC(savedUser));
+
+        Activity activityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA(savedUser));
         underTest.save(activityA);
 
-        Activity activityB = TestDataUtil.createTestActivityB(TestDataUtil.createTestProjectB());
+        Activity activityB = TestDataUtil.createTestActivityB(TestDataUtil.createTestProjectB(savedUser));
         underTest.save(activityB);
 
-        Activity activityC = TestDataUtil.createTestActivityC(TestDataUtil.createTestProjectC());
+        Activity activityC = TestDataUtil.createTestActivityC(TestDataUtil.createTestProjectC(savedUser));
         underTest.save(activityC);
 
         Iterable<Activity> result = underTest.findAll();
@@ -66,11 +78,13 @@ public class ActivityRepositoryIntegrationTests {
                 .containsExactly(activityA, activityB, activityC);
     }
 
+    @Transactional
     @Test
     public void testThatActivityCanBeUpdated() {
-        projectRepository.save(TestDataUtil.createTestProjectA());
+        User savedUser = userRepository.save(TestDataUtil.createTestUserA());
+        projectRepository.save(TestDataUtil.createTestProjectA(savedUser));
 
-        Activity activityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA());
+        Activity activityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA(savedUser));
         underTest.save(activityA);
 
         activityA.setName("UPDATED");
@@ -84,9 +98,10 @@ public class ActivityRepositoryIntegrationTests {
 
     @Test
     public void testThatActivityCanBeDeleted() {
-        projectRepository.save(TestDataUtil.createTestProjectA());
+        User savedUser = userRepository.save(TestDataUtil.createTestUserA());
+        projectRepository.save(TestDataUtil.createTestProjectA(savedUser));
 
-        Activity activityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA());
+        Activity activityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA(savedUser));
         underTest.save(activityA);
 
         underTest.deleteById(activityA.getId());

@@ -21,6 +21,8 @@ import com.gerson.projectpath_pro.activity.repository.dto.ActivityPatchRequestDt
 import com.gerson.projectpath_pro.activity.repository.dto.ActivityPostRequestDto;
 import com.gerson.projectpath_pro.activity.service.ActivityService;
 import com.gerson.projectpath_pro.project.service.ProjectService;
+import com.gerson.projectpath_pro.user.repository.User;
+import com.gerson.projectpath_pro.user.service.UserService;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -28,246 +30,262 @@ import com.gerson.projectpath_pro.project.service.ProjectService;
 @AutoConfigureMockMvc
 public class ActivityControllerIntegrationTests {
 
-    private ActivityService activityService;
+        private ActivityService activityService;
 
-    private ProjectService projectService;
+        private ProjectService projectService;
 
-    private MockMvc mockMvc;
+        private UserService userService;
 
-    private ObjectMapper objectMapper;
+        private MockMvc mockMvc;
 
-    @Autowired
-    private TestAuthUtil testAuthUtil;
+        private ObjectMapper objectMapper;
 
-    @Autowired
-    public ActivityControllerIntegrationTests(ActivityService activityService, ProjectService projectService,
-            MockMvc mockMvc) {
-        this.activityService = activityService;
-        this.projectService = projectService;
-        this.mockMvc = mockMvc;
-        this.objectMapper = new ObjectMapper();
-    }
+        @Autowired
+        private TestAuthUtil testAuthUtil;
 
-    @Test
-    public void testThatCreateActivitySuccesfullyReturnsHttp201Created() throws Exception {
-        String testJwtToken = testAuthUtil.generateTestJwtToken();
+        @Autowired
+        public ActivityControllerIntegrationTests(ActivityService activityService, ProjectService projectService,
+                        UserService userService, MockMvc mockMvc) {
+                this.activityService = activityService;
+                this.projectService = projectService;
+                this.userService = userService;
+                this.mockMvc = mockMvc;
+                this.objectMapper = new ObjectMapper();
+        }
 
-        projectService.save(TestDataUtil.createTestProjectA());
+        @Test
+        public void testThatCreateActivitySuccesfullyReturnsHttp201Created() throws Exception {
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
 
-        ActivityPostRequestDto testActivityPostRequestDtoA = TestDataUtil
-                .createTestActivityPostRequestDtoA(TestDataUtil.createTestProjectDtoA());
+                projectService.save(TestDataUtil.createTestProjectA(user));
 
-        String activityPostRequestDtoJson = objectMapper.writeValueAsString(testActivityPostRequestDtoA);
+                ActivityPostRequestDto testActivityPostRequestDtoA = TestDataUtil
+                                .createTestActivityPostRequestDtoA(TestDataUtil.createTestProjectDtoA(TestDataUtil.createTestUserDtoA()));
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/activities")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(activityPostRequestDtoJson)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
-                .andExpect(
-                        MockMvcResultMatchers.status().isCreated());
-    }
+                String activityPostRequestDtoJson = objectMapper.writeValueAsString(testActivityPostRequestDtoA);
 
-    @Test
-    public void testThatCreateActivitySuccesfullyReturnsSavedActivity() throws Exception {
-        String testJwtToken = testAuthUtil.generateTestJwtToken();
+                mockMvc.perform(
+                                MockMvcRequestBuilders.post("/api/activities")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(activityPostRequestDtoJson)
+                                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
+                                .andExpect(
+                                                MockMvcResultMatchers.status().isCreated());
+        }
 
-        projectService.save(TestDataUtil.createTestProjectA());
+        @Test
+        public void testThatCreateActivitySuccesfullyReturnsSavedActivity() throws Exception {
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
 
-        ActivityPostRequestDto testActivityPostRequestDtoA = TestDataUtil
-                .createTestActivityPostRequestDtoA(TestDataUtil.createTestProjectDtoA());
+                projectService.save(TestDataUtil.createTestProjectA(user));
 
-        String activityPostRequestDtoJson = objectMapper.writeValueAsString(testActivityPostRequestDtoA);
+                ActivityPostRequestDto testActivityPostRequestDtoA = TestDataUtil
+                                .createTestActivityPostRequestDtoA(TestDataUtil.createTestProjectDtoA(TestDataUtil.createTestUserDtoA()));
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/activities")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(activityPostRequestDtoJson)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$.id").isNumber())
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$.name").value("Security Investigation"))
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$.label").value(
-                                "A"));
-    }
+                String activityPostRequestDtoJson = objectMapper.writeValueAsString(testActivityPostRequestDtoA);
 
-    @Test
-    public void testThatListActivitiesReturnsHttpStatus200() throws Exception {
-        String testJwtToken = testAuthUtil.generateTestJwtToken();
+                mockMvc.perform(
+                                MockMvcRequestBuilders.post("/api/activities")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(activityPostRequestDtoJson)
+                                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
+                                .andExpect(
+                                                MockMvcResultMatchers.jsonPath("$.id").isNumber())
+                                .andExpect(
+                                                MockMvcResultMatchers.jsonPath("$.name")
+                                                                .value("Security Investigation"))
+                                .andExpect(
+                                                MockMvcResultMatchers.jsonPath("$.label").value(
+                                                                "A"));
+        }
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/activities")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
-                .andExpect(
-                        MockMvcResultMatchers.status().isOk());
+        @Test
+        public void testThatListActivitiesReturnsHttpStatus200() throws Exception {
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
 
-    }
+                mockMvc.perform(
+                                MockMvcRequestBuilders.get("/api/activities")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
+                                .andExpect(
+                                                MockMvcResultMatchers.status().isOk());
 
-    @Test
-    public void testThatListActivitiesReturnsListOfActivities() throws Exception {
-        projectService.save(TestDataUtil.createTestProjectA());
+        }
 
-        Activity testActivityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA());
-        activityService.save(testActivityA);
+        @Test
+        public void testThatListActivitiesReturnsListOfActivities() throws Exception {
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
 
-        String testJwtToken = testAuthUtil.generateTestJwtToken();
+                projectService.save(TestDataUtil.createTestProjectA(user));
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/activities")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$[0].id").isNumber())
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$[0].name").value("Security Investigation"))
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$[0].label").value(
-                                "A"));
-    }
+                Activity testActivityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA(user));
+                activityService.save(testActivityA);
 
-    @Test
-    public void testThatGetActivityReturnsHttpStatus200WhenActivityExists() throws Exception {
-        projectService.save(TestDataUtil.createTestProjectA());
+                mockMvc.perform(
+                                MockMvcRequestBuilders.get("/api/activities")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
+                                .andExpect(
+                                                MockMvcResultMatchers.jsonPath("$[0].id").isNumber())
+                                .andExpect(
+                                                MockMvcResultMatchers.jsonPath("$[0].name")
+                                                                .value("Security Investigation"))
+                                .andExpect(
+                                                MockMvcResultMatchers.jsonPath("$[0].label").value(
+                                                                "A"));
+        }
 
-        Activity testActivityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA());
-        activityService.save(testActivityA);
+        @Test
+        public void testThatGetActivityReturnsHttpStatus200WhenActivityExists() throws Exception {
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
 
-        String testJwtToken = testAuthUtil.generateTestJwtToken();
+                projectService.save(TestDataUtil.createTestProjectA(user));
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/activities/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
-                .andExpect(
-                        MockMvcResultMatchers.status().isOk());
+                Activity testActivityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA(user));
+                activityService.save(testActivityA);
 
-    }
+                mockMvc.perform(
+                                MockMvcRequestBuilders.get("/api/activities/1")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
+                                .andExpect(
+                                                MockMvcResultMatchers.status().isOk());
 
-    @Test
-    public void testThatGetActivityReturnsActivityWhenActivityExists() throws Exception {
-        projectService.save(TestDataUtil.createTestProjectA());
+        }
 
-        Activity testActivityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA());
-        activityService.save(testActivityA);
+        @Test
+        public void testThatGetActivityReturnsActivityWhenActivityExists() throws Exception {
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
 
-        String testJwtToken = testAuthUtil.generateTestJwtToken();
+                projectService.save(TestDataUtil.createTestProjectA(user));
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/activities/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$.id").value(1))
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$.name").value("Security Investigation"))
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$.label").value(
-                                "A"));
+                Activity testActivityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA(user));
+                activityService.save(testActivityA);
 
-    }
+                mockMvc.perform(
+                                MockMvcRequestBuilders.get("/api/activities/1")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
+                                .andExpect(
+                                                MockMvcResultMatchers.jsonPath("$.id").value(1))
+                                .andExpect(
+                                                MockMvcResultMatchers.jsonPath("$.name")
+                                                                .value("Security Investigation"))
+                                .andExpect(
+                                                MockMvcResultMatchers.jsonPath("$.label").value(
+                                                                "A"));
 
-    @Test
-    public void testThatGetActivityReturnsHttpStatus404WhenActivityDoesntExists() throws Exception {
-        String testJwtToken = testAuthUtil.generateTestJwtToken();
+        }
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/activities/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
-                .andExpect(
-                        MockMvcResultMatchers.status().isNotFound());
+        @Test
+        public void testThatGetActivityReturnsHttpStatus404WhenActivityDoesntExists() throws Exception {
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
 
-    }
+                mockMvc.perform(
+                                MockMvcRequestBuilders.get("/api/activities/1")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
+                                .andExpect(
+                                                MockMvcResultMatchers.status().isNotFound());
 
-    @Test
-    public void testThatPartialUpdateExistingActivityReturnsHttpStatus200() throws Exception {
-        projectService.save(TestDataUtil.createTestProjectA());
+        }
 
-        Activity testActivityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA());
-        Activity savedActivity = activityService.save(testActivityA);
+        @Test
+        public void testThatPartialUpdateExistingActivityReturnsHttpStatus200() throws Exception {
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
 
-        ActivityPatchRequestDto testActivityPatchRequestDtoA = TestDataUtil.createTestActivityPatchRequestDtoA();
+                projectService.save(TestDataUtil.createTestProjectA(user));
 
-        String activityPatchRequestDtoJson = objectMapper.writeValueAsString(testActivityPatchRequestDtoA);
+                Activity testActivityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA(user));
+                Activity savedActivity = activityService.save(testActivityA);
 
-        String testJwtToken = testAuthUtil.generateTestJwtToken();
+                ActivityPatchRequestDto testActivityPatchRequestDtoA = TestDataUtil
+                                .createTestActivityPatchRequestDtoA();
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.patch("/api/activities/" + savedActivity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(activityPatchRequestDtoJson)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
-                .andExpect(
-                        MockMvcResultMatchers.status().isOk());
+                String activityPatchRequestDtoJson = objectMapper.writeValueAsString(testActivityPatchRequestDtoA);
 
-    }
+                mockMvc.perform(
+                                MockMvcRequestBuilders.patch("/api/activities/" + savedActivity.getId())
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(activityPatchRequestDtoJson)
+                                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
+                                .andExpect(
+                                                MockMvcResultMatchers.status().isOk());
 
-    @Test
-    public void testThatPartialUpdateExistingActivityReturnsUpdatedActivity() throws Exception {
-        projectService.save(TestDataUtil.createTestProjectA());
+        }
 
-        Activity testActivityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA());
-        Activity savedActivity = activityService.save(testActivityA);
+        @Test
+        public void testThatPartialUpdateExistingActivityReturnsUpdatedActivity() throws Exception {
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
 
-        ActivityPatchRequestDto testActivityPatchRequestDtoA = TestDataUtil.createTestActivityPatchRequestDtoA();
+                projectService.save(TestDataUtil.createTestProjectA(user));
 
-        String activityPatchRequestDtoJson = objectMapper.writeValueAsString(testActivityPatchRequestDtoA);
+                Activity testActivityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA(user));
+                Activity savedActivity = activityService.save(testActivityA);
 
-        String testJwtToken = testAuthUtil.generateTestJwtToken();
+                ActivityPatchRequestDto testActivityPatchRequestDtoA = TestDataUtil
+                                .createTestActivityPatchRequestDtoA();
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.patch("/api/activities/" + savedActivity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(activityPatchRequestDtoJson)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$.id").value(savedActivity.getId()))
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$.name")
-                                .value("UI"))
-                // Predecessors is null and shouldn't change
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$.predecessors").value(
-                                savedActivity.getPredecessors()))
-                // Days Duration is 3 and shouldn't change
-                .andExpect(
-                        MockMvcResultMatchers.jsonPath("$.daysDuration").value(
-                                savedActivity.getDaysDuration()));
+                String activityPatchRequestDtoJson = objectMapper.writeValueAsString(testActivityPatchRequestDtoA);
 
-    }
+                mockMvc.perform(
+                                MockMvcRequestBuilders.patch("/api/activities/" + savedActivity.getId())
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(activityPatchRequestDtoJson)
+                                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
+                                .andExpect(
+                                                MockMvcResultMatchers.jsonPath("$.id").value(savedActivity.getId()))
+                                .andExpect(
+                                                MockMvcResultMatchers.jsonPath("$.name")
+                                                                .value("UI"))
+                                // Predecessors is null and shouldn't change
+                                .andExpect(
+                                                MockMvcResultMatchers.jsonPath("$.predecessors").value(
+                                                                savedActivity.getPredecessors()))
+                                // Days Duration is 3 and shouldn't change
+                                .andExpect(
+                                                MockMvcResultMatchers.jsonPath("$.daysDuration").value(
+                                                                savedActivity.getDaysDuration()));
 
-    @Test
-    public void testThatDeleteActivityReturnsHttpStatus404ForNonExistingActivity() throws Exception {
-        String testJwtToken = testAuthUtil.generateTestJwtToken();
+        }
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.delete("/api/activities/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
-                .andExpect(
-                        MockMvcResultMatchers.status().isNotFound());
+        @Test
+        public void testThatDeleteActivityReturnsHttpStatus404ForNonExistingActivity() throws Exception {
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
 
-    }
+                mockMvc.perform(
+                                MockMvcRequestBuilders.delete("/api/activities/1")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
+                                .andExpect(
+                                                MockMvcResultMatchers.status().isNotFound());
 
-    @Test
-    public void testThatDeleteActivityReturnsHttpStatus204ForExistingActivity() throws Exception {
-        projectService.save(TestDataUtil.createTestProjectA());
+        }
 
-        Activity testActivityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA());
-        Activity savedActivity = activityService.save(testActivityA);
+        @Test
+        public void testThatDeleteActivityReturnsHttpStatus204ForExistingActivity() throws Exception {
+                String testJwtToken = testAuthUtil.generateTestJwtToken();
+                User user = userService.findByEmail("pepe@gmail.com").get();
 
-        String testJwtToken = testAuthUtil.generateTestJwtToken();
+                projectService.save(TestDataUtil.createTestProjectA(user));
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.delete("/api/activities/" + savedActivity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
-                .andExpect(
-                        MockMvcResultMatchers.status().isNoContent());
+                Activity testActivityA = TestDataUtil.createTestActivityA(TestDataUtil.createTestProjectA(user));
+                Activity savedActivity = activityService.save(testActivityA);
 
-    }
+                mockMvc.perform(
+                                MockMvcRequestBuilders.delete("/api/activities/" + savedActivity.getId())
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + testJwtToken))
+                                .andExpect(
+                                                MockMvcResultMatchers.status().isNoContent());
+
+        }
 
 }
