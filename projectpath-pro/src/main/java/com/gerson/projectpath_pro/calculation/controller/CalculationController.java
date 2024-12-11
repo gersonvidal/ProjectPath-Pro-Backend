@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gerson.projectpath_pro.activity.service.ActivityService;
 import com.gerson.projectpath_pro.calculation.repository.Calculation;
 import com.gerson.projectpath_pro.calculation.repository.dto.CalculationDto;
 import com.gerson.projectpath_pro.calculation.service.CalculationService;
@@ -27,9 +28,13 @@ public class CalculationController {
 
     private Mapper<Calculation, CalculationDto> calculationMapper;
 
+    private ActivityService activityService;
+
     public CalculationController(CalculationService calculationService,
+            ActivityService activityService,
             Mapper<Calculation, CalculationDto> calculationMapper) {
         this.calculationService = calculationService;
+        this.activityService = activityService;
         this.calculationMapper = calculationMapper;
     }
 
@@ -39,7 +44,11 @@ public class CalculationController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        // Validate that the activities set is complete and there is no missing activity
+        activityService.validateActivitiesAreComplete(projectId);
+
         try {
+
             calculationService.makeAllCalculationsWhenNew(projectId);
 
             String base64Image = calculationService.getNetworkAndCriticalPathDiagram(projectId);
@@ -63,7 +72,11 @@ public class CalculationController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        // Validate that the activities set is complete and there is no missing activity
+        activityService.validateActivitiesAreComplete(projectId);
+
         try {
+
             calculationService.makeAllCalculationsWhenAlreadyExists(projectId);
 
             String base64Image = calculationService.getNetworkAndCriticalPathDiagram(projectId);
@@ -102,13 +115,22 @@ public class CalculationController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        String base64Image = calculationService.getNetworkAndCriticalPathDiagram(projectId);
+        // Validate that the activities set is complete and there is no missing activity
+        activityService.validateActivitiesAreComplete(projectId);
 
-        if (base64Image == null || base64Image.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+
+            String base64Image = calculationService.getNetworkAndCriticalPathDiagram(projectId);
+
+            if (base64Image == null || base64Image.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            return new ResponseEntity<>(base64Image, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        return new ResponseEntity<>(base64Image, HttpStatus.OK);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)

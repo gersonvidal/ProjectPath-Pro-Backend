@@ -1,5 +1,6 @@
 package com.gerson.projectpath_pro.activity.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -76,6 +77,76 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
+    public boolean predecessorsActivitiesExists(String predecessors, Long projectId) {
+        if (predecessors == null) {
+            return true; // if the activity has no predecessors, then it will cause no problem
+        }
+
+        String[] predecessorsValues = predecessors.split(",");
+
+        for (String predecessorLabel : predecessorsValues) {
+            if (!activityRepository.existsByLabelAndProjectId(predecessorLabel, projectId)) {
+                return false; // if activity doesn't exist in database it will cause an error in the future,
+                              // throw false
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public void validateActivitiesAreComplete(Long projectId) {
+        List<String> existingLabels = activityRepository.findAllLabelsByProjectId(projectId);
+
+        // Geneare all expected activities according to the given range.
+        List<String> expectedLabels = generateExpectedLabels(existingLabels);
+
+        // Validate that no label is missing in the existing set.
+        for (String expectedLabel : expectedLabels) {
+            if (!existingLabels.contains(expectedLabel)) {
+                throw new EntityNotFoundException("Missing Activity: " + expectedLabel);
+            }
+        }
+    }
+
+    private List<String> generateExpectedLabels(List<String> existingLabels) {
+        // Obtain the last tabel in the existing labels to know how far to generate
+        CustomStringComparator comparator = new CustomStringComparator();
+        
+        String lastLabel = existingLabels.stream()
+                .max(comparator)
+                .orElse("A"); // if the existingLabels list is empty A will be the last label and mandatory
+
+        List<String> labels = new ArrayList<>();
+        String currentLabel = "A";
+
+        while (true) {
+            labels.add(currentLabel);
+            if (currentLabel.equals(lastLabel)) {
+                break;
+            }
+            currentLabel = getNextLabel(currentLabel);
+        }
+
+        return labels;
+    }
+
+    private String getNextLabel(String currentLabel) {
+        int length = currentLabel.length();
+        char lastChar = currentLabel.charAt(0);
+
+        if (currentLabel.chars().allMatch(c -> c == 'Z')) {
+            // If all letters are Z, we add a new level (ej. Z -> ZZ -> ZZZ).
+            return "A".repeat(length + 1);
+        } else {
+            // Incrementar las letras actuales uniformemente (.).
+            // Increment the actual letters evenly (ej. A -> B, AA -> BB, etc)
+            char nextChar = (char) (lastChar + 1);
+            return String.valueOf(nextChar).repeat(length);
+        }
+    }
+
+    @Override
     public Activity partialUpdate(Long id, Activity activity) {
         activity.setId(id);
 
@@ -92,6 +163,13 @@ public class ActivityServiceImpl implements ActivityService {
                     existingActivity.getLabel())) {
                 System.out.println("checo si es mayor el orden");
                 throw new IllegalArgumentException("Activity Label cannot be lower than Predecessor.");
+            }
+
+            if (!predecessorsActivitiesExists(
+                    activity.getPredecessors(),
+                    existingActivity.getProject().getId())) {
+                throw new IllegalArgumentException(
+                        "Predecessor does not exist for project id: " + existingActivity.getProject().getId());
             }
 
             // Updates
